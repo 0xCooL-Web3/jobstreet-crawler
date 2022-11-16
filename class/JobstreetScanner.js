@@ -45,8 +45,10 @@ class JobstreetScanner{
         let job_list = [];
         //  loop the job list page
         // for(let page_idx=1; page_idx<=page_max; page_idx++){
-        for(let page_idx=1; page_idx<=10; page_idx++){
-            let url = `${base_url}${page_idx}/?${parameters}`;
+        for(let page_idx=1; page_idx<=1; page_idx++){
+            let url = (this.options.keyword === "")?
+                base_url: 
+                `${base_url}${page_idx}/?${parameters}`;
 
             await page.goto(url);
             await page.waitForSelector(job_list_selector);
@@ -85,9 +87,51 @@ class JobstreetScanner{
                         return [currency, salary_min, salary_max];
                     }
                     
+                    /**
+                     * from job element fetch <li> text
+                     * 
+                     * @param {html element} root 
+                     * @returns {array[string]} 
+                     */
+                    const getHighlights = (root) => {
+                        let li_eles = root.querySelectorAll(`div[data-automation="job-card-selling-points"] li`);
+                        let highlights = [];
+
+                        for(let ele of li_eles)
+                            highlights.push(ele.textContent);
+                        
+                        return highlights
+                    }
+
+                    /**
+                     * 
+                     * @param {html element} root 
+                     * @returns {array, string}
+                     */
+                    const getDetails = (root) => {
+                        //  detail root element
+                        let detail_ele = root.querySelector(`div > div > div`).nextElementSibling;
+                        let dd_eles = detail_ele.querySelectorAll(`dd`);
+                        let specializations = [];
+                        let type = "";
+                        //  last index of dd_eles array
+                        let last = dd_eles.length - 1;
+
+                        for(let i=0; i<dd_eles.length; i++)
+                            if(i === last)
+                                type = dd_eles[i].textContent;
+                            else
+                                specializations.push(dd_eles[i].textContent);
+                        
+                        return [specializations, type];
+                    }
+                    
+                    //  get domain
+                    let link = document.location.href;
+                    let domain = link.substring(0, link.indexOf('/', 9));
                     //	job url and title
                     let a = ele.querySelector(`h1 > a`);
-                    let url = a.getAttribute(`href`);
+                    let url = a.getAttribute(`href`).substring(0, a.getAttribute(`href`).indexOf('&'));
                     let job_title = a.textContent;
                     //	company element and name
                     let company_ele = ele.querySelector(`a[data-automation="jobCardCompanyLink"]`);
@@ -99,20 +143,28 @@ class JobstreetScanner{
                     let salary_ele = place_ele.nextElementSibling;
                     let salary_str = (salary_ele.nodeName === "SPAN")? salary_ele.textContent: "";
                     let [currency, salary_min, salary_max] = getSalary(salary_str);
+                    //  highlights (job sell points)
+                    let highlights = getHighlights(ele);
+                    //  specializations and type (click to get detail information)
+                    ele.querySelector(`button`).click();
+                    let [specializations, type] = getDetails(ele);
                     //	datetime with UTC+0
                     let datetime = ele.querySelector(`time`).getAttribute('datetime');
                     
                     return {
-                        url: url, 
+                        url: domain + url, 
                         job_title: job_title, 
                         company_name: company_name, 
                         place: place, 
-                        datetime: datetime, 
                         salary: {
                             currency: currency, 
                             min: salary_min, 
                             max: salary_max
-                        }
+                        }, 
+                        highlights: highlights, 
+                        specializations: specializations, 
+                        type: type, 
+                        datetime: datetime, 
                     };		
                 });
             }, job_list_selector);
