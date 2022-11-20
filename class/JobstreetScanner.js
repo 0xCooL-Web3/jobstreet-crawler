@@ -45,7 +45,7 @@ class JobstreetScanner{
         let job_list = [];
         //  loop the job list page
         // for(let page_idx=1; page_idx<=page_max; page_idx++){
-        for(let page_idx=1; page_idx<=1; page_idx++){
+        for(let page_idx=1; page_idx<=3; page_idx++){
             let url = (this.options.keyword === "")?
                 base_url: 
                 `${base_url}${page_idx}/?${parameters}`;
@@ -168,13 +168,67 @@ class JobstreetScanner{
                     };		
                 });
             }, job_list_selector);
+            
+            /**
+             *  [Detail Page Information]
+             *  open new tab link for fetch detail page information
+             
+            for(let i=0; i<json.length; i++){
+                let page = await browser.newPage();
+                let selector = `div > span`;
+                let url = json[i].url;
+
+                await page.goto(url);
+                await page.waitForSelector(selector);
+
+                let additional = await page.evaluate(selector => {
+                    //  elements of span
+                    let eles = document.querySelectorAll(selector);
+                    let additional = {
+                        career_level: '', 
+                        qualification: [],
+                        //  year (unit)
+                        experience: 0, 
+                    };
+                    let found = {
+                        career: false, 
+                        qualification: false, 
+                        experience: false
+                    };
+
+                    for(let ele of eles){
+                        if(ele.textContent === "Career Level"){
+                            additional.career_level = ele.parentElement.nextElementSibling.textContent;
+                            found.career = true;
+                        }
+                        else if(ele.textContent === "Qualification"){
+                            additional.qualification = ele.parentElement.nextElementSibling.textContent.split(", ");
+                            found.qualification = true;
+                        }
+                        else if(ele.textContent === "Years of Experience"){
+                            additional.experience = parseFloat(ele.parentElement.nextElementSibling.textContent);
+                            found.experience = true;
+                        }
+
+                        if(found.career && found.qualification && found.experience)
+                            break;
+                    }
+                    
+                    return additional;
+                }, selector);
+
+                page.close();
+                json[i].additional = additional;
+            }
+            */
 
             job_list.push(...json);
         }
 
-        console.log(job_list);
+        // console.log(job_list);
 		browser.close();
-		return job_list;
+        // return job_list;
+		return job_list.slice(0, 100);
 	}
 }
 

@@ -1,4 +1,5 @@
 const JobstreetScanner = require('./class/JobstreetScanner');
+const JobstreetAnalysis = require('./class/JobstreetAnalysis');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -14,8 +15,20 @@ app.get('/scanner', (req, res) => {
 	let scanner = new JobstreetScanner(req.query);	
 
 	scanner.fetchData()
-		.then(json => {
+		.then(data => {
+			let analysis = new JobstreetAnalysis(data);
+			/*
+			let json = {
+				source: data, 
+				analysis: analysis
+			}
+
+			console.log(analysis);
 			res.json(json);
+			*/
+
+			console.log(analysis);
+			res.json(analysis);
 			res.end();
 		});
 });
