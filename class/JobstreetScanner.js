@@ -172,8 +172,9 @@ class JobstreetScanner{
             /**
              *  [Detail Page Information]
              *  open new tab link for fetch detail page information
-             
+             */
             for(let i=0; i<json.length; i++){
+            // for(let i=0; i<1; i++){
                 let page = await browser.newPage();
                 let selector = `div > span`;
                 let url = json[i].url;
@@ -220,7 +221,7 @@ class JobstreetScanner{
                 page.close();
                 json[i].additional = additional;
             }
-            */
+            
 
             job_list.push(...json);
         }

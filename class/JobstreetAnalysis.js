@@ -58,8 +58,44 @@ class JobstreetAnalysis{
             return result;
         }
 
+        /**
+         *  @param {string} career_level
+         *  @param {array} qualification
+         *  @param {int} experience
+         */
+        const jobAdditional = () => {
+            //  use map to count unique value appear time
+            let map_lv = new Map();
+            let map_qualification = new Map();
+            let map_exp = new Map();
+            //  career_level with mix with experience to store
+            let map_lv_exp = new Map();
+            
+            for(let obj of json){
+                let add = obj.additional;
+                let lv_exp = `${add.career_level}_${add.experience}`;
+                
+                map_lv.set(add.career_level, (map_lv.get(add.career_level) || 0) + 1);
+                map_exp.set(add.experience, (map_exp.get(add.experience) || 0) + 1);
+                for(let str of add.qualification)
+                    map_qualification.set(str, (map_qualification.get(str) || 0) + 1);
+                map_lv_exp.set(lv_exp, (map_lv_exp.get(lv_exp) || 0) + 1);
+            }
+            
+            //  build return result object
+            let result = {
+                career_level: [...map_lv], 
+                qualification: [...map_qualification], 
+                experience: [...map_exp], 
+            }
+
+            console.log(result);
+            return result;
+        }
+
         let analysis = {
-            salary: salary()
+            salary: salary(), 
+            job_additional: jobAdditional()
         };
 
         return analysis;

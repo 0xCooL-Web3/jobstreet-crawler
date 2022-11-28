@@ -17,18 +17,14 @@ app.get('/scanner', (req, res) => {
 	scanner.fetchData()
 		.then(data => {
 			let analysis = new JobstreetAnalysis(data);
-			/*
 			let json = {
 				source: data, 
 				analysis: analysis
 			}
 
-			console.log(analysis);
+			// console.log(analysis);
+			// res.json(analysis);
 			res.json(json);
-			*/
-
-			console.log(analysis);
-			res.json(analysis);
 			res.end();
 		});
 });
